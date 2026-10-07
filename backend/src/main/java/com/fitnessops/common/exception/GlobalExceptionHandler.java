@@ -3,6 +3,7 @@ package com.fitnessops.common.exception;
 import com.fitnessops.common.dto.ErrorResponse;
 import com.fitnessops.common.dto.FieldErrorResponse;
 import com.fitnessops.common.enums.ErrorCode;
+import com.fitnessops.common.logging.LogSanitizer;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -56,29 +57,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
         MissingRequestHeaderException.class, HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ErrorResponse> handleMalformed(Exception ex, HttpServletRequest request) {
-        log.debug("Malformed request on {}: {}", request.getRequestURI(), ex.getMessage());
+        log.debug("Malformed request on {}: {}", LogSanitizer.sanitize(request.getRequestURI()),
+                LogSanitizer.sanitize(ex.getMessage()));
         return respond(ErrorCode.MALFORMED_REQUEST, List.of(), request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleAccessDenied(HttpServletRequest request) {
         return respond(ErrorCode.FORBIDDEN, List.of(), request);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NoResourceFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleNotFound(HttpServletRequest request) {
         return respond(ErrorCode.NOT_FOUND, List.of(), request);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpRequestMethodNotSupportedException ex,
-                                                                HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleMethodNotAllowed(HttpServletRequest request) {
         return respond(ErrorCode.METHOD_NOT_ALLOWED, List.of(), request);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error on {} {}", request.getMethod(), request.getRequestURI(), ex);
+        log.error("Unexpected error on {} {}", LogSanitizer.sanitize(request.getMethod()),
+                LogSanitizer.sanitize(request.getRequestURI()), ex);
         return respond(ErrorCode.INTERNAL_ERROR, List.of(), request);
     }
 

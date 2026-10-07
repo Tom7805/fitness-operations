@@ -8,18 +8,9 @@ import java.util.UUID;
 import lombok.Builder;
 
 /**
- * Một sự kiện cần ghi vào nhật ký đăng nhập.
- *
- * @param type       loại sự kiện
- * @param reason     mã lý do, có thể {@code null}
- * @param userId     người thực hiện nếu xác định được
- * @param username   tên đăng nhập đã nhập
- * @param sessionId  phiên liên quan
- * @param clientType loại thiết bị
- * @param deviceId   máy quầy liên quan
- * @param branchId   câu lạc bộ liên quan
- * @param client     địa chỉ IP và trình duyệt
- * @param detail     nội dung tiếng Việt
+ * Một sự kiện cần ghi vào nhật ký đăng nhập: loại sự kiện và mã lý do, người thực hiện (mã tài khoản nếu xác định
+ * được, tên đăng nhập đã nhập), phiên, loại thiết bị, máy quầy, câu lạc bộ, địa chỉ IP và trình duyệt
+ * ({@code client}) cùng nội dung tiếng Việt ({@code detail}).
  */
 @Builder
 public record AuthAuditEvent(
