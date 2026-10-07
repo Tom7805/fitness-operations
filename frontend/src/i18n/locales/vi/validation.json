@@ -1,0 +1,13 @@
+{
+  "required": {
+    "username": "Vui lòng nhập tên đăng nhập.",
+    "password": "Vui lòng nhập mật khẩu.",
+    "branch": "Vui lòng chọn câu lạc bộ.",
+    "deviceName": "Vui lòng đặt tên cho máy quầy."
+  },
+  "max": {
+    "username": "Tên đăng nhập tối đa 50 ký tự.",
+    "password": "Mật khẩu tối đa 128 ký tự.",
+    "deviceName": "Tên máy quầy tối đa 100 ký tự."
+  }
+}

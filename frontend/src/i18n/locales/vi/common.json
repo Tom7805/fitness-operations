@@ -1,0 +1,114 @@
+{
+  "app": {
+    "name": "Vận Hành Phòng Tập",
+    "tagline": "Vận hành phòng tập thể hình từ buổi tập thử tới hội viên gắn bó lâu dài",
+    "highlights": {
+      "access": "Ra vào đúng quyền lợi gói tập",
+      "training": "Lớp nhóm và huấn luyện cá nhân minh bạch",
+      "payments": "Thu tiền và hóa đơn khớp từng ca"
+    }
+  },
+  "common": {
+    "loading": "Đang tải…"
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Dùng tài khoản được cấp để làm việc theo vai trò của bạn.",
+      "counterTitle": "Đăng nhập tại quầy",
+      "counterDescription": "Phiên làm việc gắn với máy quầy này.",
+      "username": "Tên đăng nhập",
+      "usernamePlaceholder": "vd. letan.caugiay",
+      "password": "Mật khẩu",
+      "showPassword": "Hiện mật khẩu",
+      "hidePassword": "Ẩn mật khẩu",
+      "capsLock": "Caps Lock đang bật",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập…",
+      "retryIn": "Thử lại sau {{time}}",
+      "counterLink": "Máy quầy lễ tân?",
+      "counterLinkAction": "Mở trang máy quầy",
+      "standardLink": "Không phải máy quầy?",
+      "standardLinkAction": "Đăng nhập thường"
+    },
+    "errors": {
+      "invalidCredentialsTitle": "Không đăng nhập được",
+      "lockedTitle": "Tài khoản tạm khóa",
+      "lockedCountdown": "Có thể thử lại sau: {{time}}",
+      "lockExpired": "Đã hết thời gian tạm khóa. Bạn có thể đăng nhập lại.",
+      "disabledTitle": "Tài khoản đã bị khóa",
+      "deviceNotRegisteredTitle": "Máy chưa được đăng ký",
+      "deviceNotRegisteredAction": "Đăng ký máy quầy",
+      "deviceBranchTitle": "Sai câu lạc bộ",
+      "networkTitle": "Không kết nối được máy chủ",
+      "genericTitle": "Đã có lỗi xảy ra"
+    },
+    "notice": {
+      "expiredTitle": "Phiên đã hết hạn",
+      "invalidTitle": "Cần đăng nhập lại",
+      "logout": "Bạn đã đăng xuất."
+    },
+    "device": {
+      "badge": "Máy quầy",
+      "unregisteredTitle": "Máy chưa được đăng ký với câu lạc bộ",
+      "unregisteredBody": "Máy quầy phải được quản lý câu lạc bộ đăng ký trước khi lễ tân đăng nhập. Vui lòng nhờ quản lý đăng nhập trên máy này để đăng ký máy với câu lạc bộ.",
+      "registerAction": "Quản lý đăng nhập để đăng ký máy",
+      "checking": "Đang kiểm tra máy quầy…",
+      "checkFailed": "Không kiểm tra được trạng thái máy quầy.",
+      "retry": "Thử lại"
+    },
+    "register": {
+      "step1Title": "Đăng ký máy quầy · Bước 1/2",
+      "step1Description": "Quản lý câu lạc bộ đăng nhập để xác nhận đăng ký máy này.",
+      "step2Title": "Đăng ký máy quầy · Bước 2/2",
+      "step2Description": "Chọn câu lạc bộ đặt máy và đặt tên cho máy quầy.",
+      "confirmedBy": "Người xác nhận: {{name}}",
+      "branch": "Câu lạc bộ",
+      "deviceName": "Tên máy quầy",
+      "deviceNameHint": "Tên giúp phân biệt các máy trong câu lạc bộ.",
+      "deviceNameDefault": "Quầy lễ tân 1",
+      "submit": "Đăng ký máy",
+      "submitting": "Đang đăng ký…",
+      "cancel": "Hủy và đăng xuất",
+      "notAllowed": "Chỉ quản lý câu lạc bộ hoặc quản trị viên được đăng ký máy quầy.",
+      "noBranches": "Tài khoản chưa được giao câu lạc bộ nào để đăng ký máy quầy.",
+      "success": "Đã đăng ký máy quầy \"{{device}}\" cho {{branch}}. Lễ tân có thể đăng nhập."
+    },
+    "session": {
+      "warningTitle": "Phiên làm việc sắp hết hạn",
+      "warningBody": "Bạn chưa thao tác trong một lúc. Phiên sẽ tự kết thúc sau {{seconds}} giây để bảo vệ tài khoản.",
+      "stay": "Tiếp tục làm việc",
+      "logout": "Đăng xuất",
+      "expired": "Phiên làm việc đã hết hạn do không thao tác trong {{minutes}} phút. Vui lòng đăng nhập lại."
+    }
+  },
+  "layout": {
+    "userMenu": "Tài khoản của tôi",
+    "logout": "Đăng xuất",
+    "chainWide": "Toàn chuỗi",
+    "branchCount": "{{count}} câu lạc bộ",
+    "noBranch": "Chưa được giao câu lạc bộ"
+  },
+  "home": {
+    "greeting": "Xin chào, {{name}}",
+    "functionsTitle": "Chức năng của bạn",
+    "comingSoon": "Sắp ra mắt",
+    "sessionInfo": "Phiên làm việc trên {{client}} · tự hết hạn sau {{minutes}} phút không thao tác",
+    "noRoles": "Tài khoản chưa được gán vai trò nào. Vui lòng liên hệ quản trị viên."
+  },
+  "clientType": {
+    "COUNTER": "máy quầy",
+    "OFFICE": "máy tính văn phòng",
+    "MOBILE": "điện thoại"
+  },
+  "errors": {
+    "notFoundTitle": "Không tìm thấy trang",
+    "notFoundBody": "Đường dẫn không tồn tại hoặc đã thay đổi.",
+    "forbiddenTitle": "Không có quyền truy cập",
+    "forbiddenBody": "Vai trò của bạn không dùng được chức năng này.",
+    "unexpectedTitle": "Đã có lỗi xảy ra",
+    "unexpectedBody": "Giao diện gặp lỗi không mong muốn. Vui lòng tải lại trang.",
+    "backHome": "Về trang chính",
+    "reload": "Tải lại trang"
+  }
+}
