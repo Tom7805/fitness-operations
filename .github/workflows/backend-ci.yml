@@ -1,0 +1,74 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: backend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend-build:
+    name: backend-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect backend changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/backend-ci.yml'
+
+      - name: Check Maven project is initialized
+        id: project
+        run: |
+          if [ -s pom.xml ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::backend/pom.xml is empty - skipping backend build."
+          fi
+
+      - name: Set up JDK 17
+        if: steps.changes.outputs.backend == 'true' && steps.project.outputs.ready == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Build, test and verify
+        if: steps.changes.outputs.backend == 'true' && steps.project.outputs.ready == 'true'
+        run: |
+          if [ -s mvnw ]; then
+            chmod +x mvnw
+            ./mvnw -B -ntp verify
+          else
+            mvn -B -ntp verify
+          fi
+
+      - name: Upload test reports
+        if: always() && steps.changes.outputs.backend == 'true' && steps.project.outputs.ready == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            backend/target/surefire-reports/
+            backend/target/failsafe-reports/
+            backend/target/site/jacoco/
+          if-no-files-found: ignore

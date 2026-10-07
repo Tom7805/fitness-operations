@@ -1,0 +1,72 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-build:
+    name: frontend-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect frontend changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/frontend-ci.yml'
+
+      - name: Check Node project is initialized
+        id: project
+        run: |
+          if [ -s package.json ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::frontend/package.json is empty - skipping frontend build."
+          fi
+
+      - name: Set up Node.js 22
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Lint
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        run: npm run lint --if-present
+
+      - name: Type check
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        run: npm run typecheck --if-present
+
+      - name: Unit tests
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        run: npm test --if-present -- --run
+
+      - name: Build
+        if: steps.changes.outputs.frontend == 'true' && steps.project.outputs.ready == 'true'
+        run: npm run build --if-present

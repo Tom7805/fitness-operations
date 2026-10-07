@@ -1,0 +1,67 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: detect-languages
+    runs-on: ubuntu-latest
+    outputs:
+      languages: ${{ steps.detect.outputs.languages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Only analyze languages that already contain real (non-empty) source files
+      - name: Detect languages with source code
+        id: detect
+        run: |
+          langs=""
+          if find backend/src/main/java -name "*.java" -size +0 2>/dev/null | grep -q .; then
+            langs="$langs\"java-kotlin\","
+          fi
+          if find frontend/src -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -size +0 2>/dev/null | grep -q .; then
+            langs="$langs\"javascript-typescript\","
+          fi
+          json="[${langs%,}]"
+          echo "languages=$json" >> "$GITHUB_OUTPUT"
+          echo "Detected languages: $json"
+
+  analyze:
+    name: analyze (${{ matrix.language }})
+    needs: detect
+    if: needs.detect.outputs.languages != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(needs.detect.outputs.languages) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
