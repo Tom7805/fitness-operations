@@ -1,0 +1,17 @@
+# Kiểm thử chạy trên MySQL thật, database riêng fitness_operations_test (scripts/mysql-dev-setup.sql).
+# Database này bị xóa sạch rồi tạo lại bằng Flyway ở đầu mỗi lần chạy kiểm thử (IntegrationTestConfig).
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:mysql://localhost:3306/fitness_operations_test?characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${TEST_DB_USERNAME:fitness}
+    password: ${TEST_DB_PASSWORD:fitness}
+  flyway:
+    locations: classpath:db/migration
+    clean-disabled: false
+  jpa:
+    show-sql: false
+
+app:
+  security:
+    jwt:
+      secret: dGVzdC1vbmx5LWZpdG5lc3Mtb3BlcmF0aW9ucy1qd3Qtc2VjcmV0LWtleS0yMDI2

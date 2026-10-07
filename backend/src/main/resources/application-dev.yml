@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    # Mật khẩu tài khoản dev tạo bởi scripts/mysql-dev-setup.sql; môi trường khác đặt SPRING_DATASOURCE_PASSWORD.
+    password: fitness
+  flyway:
+    # db/seed chứa dữ liệu mẫu chỉ dùng cho máy phát triển.
+    locations: classpath:db/migration,classpath:db/seed
+
+app:
+  security:
+    jwt:
+      # Khóa chỉ dùng cho môi trường dev. Không dùng lại ở staging/prod.
+      secret: ${JWT_SECRET:ZGV2LW9ubHktZml0bmVzcy1vcGVyYXRpb25zLWp3dC1zZWNyZXQta2V5LTIwMjY=}
+
+logging:
+  level:
+    com.fitnessops: DEBUG
