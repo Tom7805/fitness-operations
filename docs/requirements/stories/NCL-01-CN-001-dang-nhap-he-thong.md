@@ -59,7 +59,8 @@ sau mở rộng các bảng này bằng migration mới, không sửa migration 
 
 ### R2. Tạm khóa sau 5 lần nhập sai liên tiếp (TC-02)
 - Mỗi lần **sai mật khẩu** của một tài khoản tồn tại làm tăng bộ đếm sai liên tiếp của tài khoản đó.
-- Lần sai thứ 5 đặt **thời điểm hết khóa = thời điểm đó + 15 phút**.
+- Lần sai thứ 5 đặt **thời điểm hết khóa = thời điểm đó + 15 phút** và trả ngay thông báo tạm khóa, để người dùng
+  biết dừng thử thay vì tiếp tục nhập.
 - Từ lần gửi thứ 6 trở đi, trong lúc còn khóa, hệ thống **từ chối mà không kiểm tra mật khẩu** (kể cả mật khẩu đúng) và
   trả thời gian chờ còn lại: *"Tài khoản tạm khóa do nhập sai mật khẩu 5 lần liên tiếp. Vui lòng thử lại sau N phút."*
   Lần từ chối này không kéo dài thời gian khóa.
@@ -148,8 +149,9 @@ Nhận {tên đăng nhập, mật khẩu, loại thiết bị} + mã máy quầy
  ├─ Khóa đã hết hạn? → bộ đếm = 0
  ├─ So khớp mật khẩu
  │    └─ sai → bộ đếm + 1 → ghi LOGIN_FAILED/INVALID_PASSWORD
+ │             ├─ bộ đếm < 5 → 401 INVALID_CREDENTIALS
  │             └─ bộ đếm = 5 → đặt hết khóa = bây giờ + 15 phút → ghi ACCOUNT_TEMPORARILY_LOCKED
- │             → 401 INVALID_CREDENTIALS
+ │                           → 423 ACCOUNT_TEMPORARILY_LOCKED (+ thời gian chờ)
  ├─ Mật khẩu đúng → bộ đếm = 0
  ├─ Tài khoản đã khóa? → ghi LOGIN_REJECTED/ACCOUNT_DISABLED → 403 ACCOUNT_DISABLED
  ├─ Có máy quầy và tài khoản không được giao câu lạc bộ của máy → ghi LOGIN_REJECTED → 403 DEVICE_BRANCH_NOT_ASSIGNED
@@ -212,9 +214,11 @@ Mã lỗi chi tiết: [docs/api/error-codes.md](../../api/error-codes.md).
 
 ## 9. Ánh xạ tiêu chí chấp nhận
 
-| Tiêu chí | Quy tắc | Kiểm thử máy chủ | Kiểm thử giao diện |
+| Tiêu chí | Quy tắc | Kiểm thử máy chủ | Kiểm thử giao diện / đầu-cuối |
 |---|---|---|---|
-| `TC-01` Lễ tân đăng nhập đúng trên máy quầy đã đăng ký | R4, R5, R6 | `AuthIntegrationTest.tc01_*` | `LoginPage.test.tsx`, `auth.spec.ts` |
-| `TC-02` Lần thứ sáu sau 5 lần sai → khóa 15 phút, báo thời gian chờ | R2 | `AuthIntegrationTest.tc02_*` | `LoginPage.test.tsx`, `auth.spec.ts` |
-| `TC-03` Máy tính bảng mới chưa đăng ký → yêu cầu quản lý đăng ký | R4 | `AuthIntegrationTest.tc03_*`, `DeviceIntegrationTest` | `CounterPage.test.tsx`, `auth.spec.ts` |
-| `TC-04` Ghi người thực hiện, nội dung, thời điểm | R7 | `AuthIntegrationTest.tc04_*` | Kiểm tra trên cơ sở dữ liệu trong báo cáo kiểm thử |
+| `TC-01` Lễ tân đăng nhập đúng trên máy quầy đã đăng ký | R4, R5, R6 | `AuthIntegrationTest$Tc01` | `LoginPage.test.tsx`, `auth.spec.ts` |
+| `TC-02` Lần thứ sáu sau 5 lần sai → khóa 15 phút, báo thời gian chờ | R2 | `AuthIntegrationTest$Tc02` | `LoginForm.test.tsx`, `auth.spec.ts` |
+| `TC-03` Máy tính bảng mới chưa đăng ký → yêu cầu quản lý đăng ký | R4 | `AuthIntegrationTest$Tc03`, `CounterDeviceIntegrationTest` | `CounterPage.test.tsx`, `DeviceRegistrationPage.test.tsx`, `auth.spec.ts` |
+| `TC-04` Ghi người thực hiện, nội dung, thời điểm | R7 | `AuthIntegrationTest$Tc04` | `auth.spec.ts` (đối chiếu cơ sở dữ liệu) |
+
+Kết quả chạy: [báo cáo kiểm thử](../../qa/NCL-01-CN-001/bao-cao-kiem-thu.md).

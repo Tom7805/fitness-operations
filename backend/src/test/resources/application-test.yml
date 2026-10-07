@@ -1,0 +1,10 @@
+spring:
+  flyway:
+    locations: classpath:db/migration
+  jpa:
+    show-sql: false
+
+app:
+  security:
+    jwt:
+      secret: dGVzdC1vbmx5LWZpdG5lc3Mtb3BlcmF0aW9ucy1qd3Qtc2VjcmV0LWtleS0yMDI2

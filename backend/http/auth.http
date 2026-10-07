@@ -1,0 +1,62 @@
+### NCL-01-CN-001 Đăng nhập hệ thống — chạy với môi trường "dev" (dữ liệu mẫu R__seed_dev_sample_data.sql)
+
+### 1. Máy này đã là máy quầy chưa? (TC-03)
+GET {{baseUrl}}/devices/current
+
+### 2. Lễ tân đăng nhập khi máy chưa đăng ký → 403 DEVICE_NOT_REGISTERED (TC-03)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "letan.caugiay", "password": "{{password}}", "clientType": "OFFICE" }
+
+### 3. Quản lý câu lạc bộ đăng nhập để đăng ký máy
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "quanly.caugiay", "password": "{{password}}", "clientType": "OFFICE" }
+
+> {% client.global.set("managerToken", response.body.accessToken); %}
+
+### 4. Câu lạc bộ quản lý được phép đăng ký máy
+GET {{baseUrl}}/devices/registrable-branches
+Authorization: Bearer {{managerToken}}
+
+> {% client.global.set("branchId", response.body[0].id); %}
+
+### 5. Đăng ký máy quầy — mã máy quầy chỉ trả về một lần
+POST {{baseUrl}}/devices
+Authorization: Bearer {{managerToken}}
+Content-Type: application/json
+
+{ "branchId": {{branchId}}, "name": "Quầy lễ tân 1" }
+
+> {% client.global.set("deviceToken", response.body.deviceToken); %}
+
+### 6. Quản lý đăng xuất khỏi máy quầy
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{managerToken}}
+
+### 7. Lễ tân đăng nhập trên máy quầy đã đăng ký → 200, phiên COUNTER (TC-01)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+X-Device-Token: {{deviceToken}}
+
+{ "username": "letan.caugiay", "password": "{{password}}" }
+
+> {% client.global.set("accessToken", response.body.accessToken); %}
+
+### 8. Phiên hiện tại (đồng thời giữ phiên)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{accessToken}}
+X-Device-Token: {{deviceToken}}
+
+### 9. Nhập sai mật khẩu — gửi 6 lần để thấy 423 ACCOUNT_TEMPORARILY_LOCKED (TC-02)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "username": "ketoan", "password": "sai-mat-khau" }
+
+### 10. Đăng xuất
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{accessToken}}
+X-Device-Token: {{deviceToken}}
