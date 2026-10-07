@@ -1,6 +1,6 @@
 # Fitness Operations
 
-Hệ thống quản lý vận hành phòng tập (gym/fitness center): hội viên, gói tập, huấn luyện viên, lớp học, đặt lịch, check-in, thanh toán, thiết bị và báo cáo.
+Hệ thống quản lý vận hành phòng tập (gym/fitness center) gồm backend Spring Boot và frontend React, quản lý hội viên, gói tập, huấn luyện viên, lớp học, đặt lịch, check-in, thanh toán, thiết bị và báo cáo.
 
 > **Trạng thái:** 🚧 Đang phát triển. Dự án đang ở giai đoạn **Walking Skeleton**: đã có cấu trúc thư mục và file, chưa có mã nguồn.
 
@@ -48,6 +48,8 @@ Hệ thống quản lý vận hành phòng tập (gym/fitness center): hội vi�
 
 ## Công nghệ
 
+### Backend
+
 | Hạng mục | Công nghệ |
 |---|---|
 | Ngôn ngữ | Java 17 |
@@ -61,15 +63,46 @@ Hệ thống quản lý vận hành phòng tập (gym/fitness center): hội vi�
 | Tài liệu API | SpringDoc OpenAPI (Swagger UI) |
 | Kiểm thử | JUnit 5, Mockito, Testcontainers, ArchUnit |
 | Chất lượng mã | Checkstyle, SpotBugs, PMD, JaCoCo |
-| Hạ tầng | Docker, Docker Compose, Kubernetes (Kustomize), Nginx |
+
+### Frontend
+
+| Hạng mục | Công nghệ |
+|---|---|
+| Ngôn ngữ | TypeScript |
+| Framework | React + Vite |
+| Routing | React Router |
+| Gọi API & cache dữ liệu | Axios, TanStack Query |
+| State toàn cục | Zustand |
+| Form & validation | React Hook Form, Zod |
+| Giao diện | Tailwind CSS, shadcn/ui |
+| Biểu đồ | Recharts |
+| Đa ngôn ngữ | i18next |
+| Kiểm thử | Vitest, Testing Library, MSW, Playwright |
+| Chất lượng mã | ESLint, Prettier |
+
+### Hạ tầng & vận hành
+
+| Hạng mục | Công nghệ |
+|---|---|
+| Container | Docker, Docker Compose |
+| Triển khai | Kubernetes (Kustomize), Nginx |
 | Giám sát | Prometheus, Grafana |
 | CI/CD | GitHub Actions |
 
-> Phiên bản cụ thể sẽ được chốt trong `pom.xml`.
+> Phiên bản cụ thể sẽ được chốt trong `backend/pom.xml` và `frontend/package.json`.
 
 ## Kiến trúc
 
-Dự án theo mô hình **Modular Monolith**: code được chia theo nghiệp vụ trong `modules/`, mỗi module có các tầng giống nhau:
+Dự án tổ chức theo dạng **monorepo**: backend và frontend nằm chung một repo, dùng chung tài liệu, cấu hình hạ tầng và CI/CD.
+
+```
+Trình duyệt ──► Nginx ──┬──► frontend (React SPA)
+                        └──► /api ──► backend (Spring Boot) ──► PostgreSQL, Redis
+```
+
+### Backend: Modular Monolith
+
+Code được chia theo nghiệp vụ trong `modules/`, mỗi module có các tầng giống nhau:
 
 ```
 modules/<module>/
@@ -87,40 +120,80 @@ modules/<module>/
 
 Các module giao tiếp với nhau qua service interface hoặc domain event (Spring `ApplicationEvent`), không gọi thẳng repository của module khác.
 
+### Frontend: Feature-based
+
+Mỗi tính năng nằm gọn trong `features/<feature>/`, tương ứng với module nghiệp vụ ở backend:
+
+```
+features/<feature>/
+├── api/                 # Hàm gọi API
+├── components/          # Component riêng của tính năng
+├── hooks/               # Query/mutation hook (TanStack Query)
+├── pages/               # Trang gắn với route
+├── schemas/             # Zod schema cho form
+├── types/               # Kiểu dữ liệu
+├── __tests__/           # Unit test
+├── routes.tsx           # Khai báo route của tính năng
+└── index.ts             # Public API của tính năng
+```
+
+Thành phần dùng chung (UI primitives, layout, hook, HTTP client, store) nằm ngoài `features/`. Một tính năng không import trực tiếp file nội bộ của tính năng khác, chỉ dùng qua `index.ts`.
+
 ## Cấu trúc thư mục
 
 ```
 fitness-operations/
-├── .github/                 # CI/CD workflows, PR/Issue templates
-├── config/                  # Cấu hình Checkstyle, SpotBugs, PMD
-├── deploy/k8s/              # Kubernetes manifests (base + overlays)
-├── docker/                  # Cấu hình Postgres, Nginx, Redis, Prometheus, Grafana
-├── docs/                    # Tài liệu yêu cầu, kiến trúc, DB, API, hướng dẫn
-├── http/                    # File .http để test API trong IDE
-├── scripts/                 # Script build, chạy dev, backup/restore DB
-└── src/
-    ├── main/
-    │   ├── java/com/fitnessops/
-    │   │   ├── common/      # Thành phần dùng chung: DTO, exception, util, validation
-    │   │   ├── config/      # Cấu hình Spring
-    │   │   ├── security/    # JWT, UserDetails, xử lý lỗi xác thực
-    │   │   ├── scheduler/   # Các job định kỳ
-    │   │   └── modules/     # Các module nghiệp vụ
-    │   └── resources/
-    │       ├── db/migration/    # Flyway migration
-    │       ├── db/seed/         # Dữ liệu khởi tạo
-    │       ├── i18n/            # Đa ngôn ngữ (vi, en)
-    │       └── templates/       # Email & báo cáo
-    └── test/                # Unit test, integration test, architecture test
+├── .github/                     # CI/CD workflows (backend, frontend), PR/Issue templates
+├── backend/                     # Spring Boot API
+│   ├── config/                  # Checkstyle, SpotBugs, PMD
+│   ├── http/                    # File .http để test API trong IDE
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── java/com/fitnessops/
+│   │   │   │   ├── common/      # DTO, exception, util, validation dùng chung
+│   │   │   │   ├── config/      # Cấu hình Spring
+│   │   │   │   ├── security/    # JWT, UserDetails, xử lý lỗi xác thực
+│   │   │   │   ├── scheduler/   # Các job định kỳ
+│   │   │   │   └── modules/     # Các module nghiệp vụ
+│   │   │   └── resources/
+│   │   │       ├── db/migration/    # Flyway migration
+│   │   │       ├── db/seed/         # Dữ liệu khởi tạo
+│   │   │       ├── i18n/            # Đa ngôn ngữ (vi, en)
+│   │   │       └── templates/       # Email & báo cáo
+│   │   └── test/                # Unit test, integration test, architecture test
+│   ├── Dockerfile
+│   └── pom.xml
+├── frontend/                    # React + Vite + TypeScript
+│   ├── nginx/                   # Cấu hình Nginx phục vụ bản build
+│   ├── public/
+│   ├── src/
+│   │   ├── app/                 # Router, providers
+│   │   ├── components/          # UI dùng chung (ui, common, form, charts)
+│   │   ├── features/            # Các tính năng nghiệp vụ
+│   │   ├── layouts/             # MainLayout, AuthLayout
+│   │   ├── pages/               # Trang lỗi (404, 403, 500)
+│   │   ├── services/            # HTTP client, storage
+│   │   ├── store/               # State toàn cục (Zustand)
+│   │   ├── hooks/ lib/ utils/ constants/ types/ i18n/ styles/ config/
+│   │   └── main.tsx
+│   ├── tests/                   # Setup test, MSW mocks, E2E (Playwright)
+│   ├── Dockerfile
+│   └── package.json
+├── deploy/k8s/                  # Kubernetes manifests (base + overlays dev/staging/prod)
+├── docker/                      # Cấu hình Postgres, Nginx, Redis, Prometheus, Grafana
+├── docs/                        # Tài liệu yêu cầu, kiến trúc, DB, API, hướng dẫn
+├── scripts/                     # Script build, chạy dev, backup/restore DB
+└── docker-compose*.yml          # Chạy toàn bộ hệ thống bằng Docker
 ```
 
 ## Bắt đầu
 
-> ⚠️ Phần này sẽ dùng được khi đã hoàn thiện `pom.xml`, `docker-compose.yml` và các file cấu hình.
+> ⚠️ Phần này sẽ dùng được khi đã hoàn thiện `pom.xml`, `package.json`, `docker-compose*.yml` và các file cấu hình.
 
 ### Yêu cầu
 
 - JDK 17
+- Node.js 22 LTS trở lên
 - Docker và Docker Compose
 - Git
 
@@ -128,23 +201,37 @@ fitness-operations/
 
 ```bash
 # 1. Clone dự án
-git clone <repository-url>
+git clone https://github.com/Tom7805/fitness-operations.git
 cd fitness-operations
 
 # 2. Tạo file biến môi trường
 cp .env.example .env
+cp frontend/.env.example frontend/.env
 
 # 3. Khởi động hạ tầng (PostgreSQL, Redis...)
 docker compose -f docker-compose.dev.yml up -d
 
-# 4. Chạy ứng dụng với profile dev
+# 4. Chạy backend với profile dev
+cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# 5. Chạy frontend (mở terminal khác)
+cd frontend
+npm install
+npm run dev
+```
+
+Hoặc chạy toàn bộ hệ thống bằng Docker:
+
+```bash
+docker compose up -d --build
 ```
 
 Sau khi chạy:
 
 | Dịch vụ | URL |
 |---|---|
+| Frontend | http://localhost:5173 |
 | API | http://localhost:8080/api/v1 |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
 | Health check | http://localhost:8080/actuator/health |
@@ -152,11 +239,19 @@ Sau khi chạy:
 ### Kiểm thử
 
 ```bash
-./mvnw test      # Unit test
-./mvnw verify    # Toàn bộ test + kiểm tra chất lượng mã
+# Backend
+cd backend
+./mvnw test          # Unit test
+./mvnw verify        # Toàn bộ test + kiểm tra chất lượng mã
+
+# Frontend
+cd frontend
+npm run lint         # ESLint
+npm run test         # Unit test (Vitest)
+npm run test:e2e     # E2E test (Playwright)
 ```
 
-### Profile cấu hình
+### Profile cấu hình backend
 
 | Profile | File | Mục đích |
 |---|---|---|
