@@ -3,7 +3,6 @@ package com.fitnessops.common.exception;
 import com.fitnessops.common.dto.ErrorResponse;
 import com.fitnessops.common.dto.FieldErrorResponse;
 import com.fitnessops.common.enums.ErrorCode;
-import com.fitnessops.common.logging.LogSanitizer;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +56,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class,
         MissingRequestHeaderException.class, HttpMediaTypeNotSupportedException.class})
     public ResponseEntity<ErrorResponse> handleMalformed(Exception ex, HttpServletRequest request) {
-        log.debug("Malformed request on {}: {}", LogSanitizer.sanitize(request.getRequestURI()),
-                LogSanitizer.sanitize(ex.getMessage()));
+        // Không ghi URI hay dữ liệu người dùng gửi lên vào log (chống chèn log); traceId trong MDC đủ để truy yêu cầu.
+        log.debug("Malformed request rejected: {}", ex.getClass().getSimpleName());
         return respond(ErrorCode.MALFORMED_REQUEST, List.of(), request);
     }
 
@@ -79,8 +78,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error on {} {}", LogSanitizer.sanitize(request.getMethod()),
-                LogSanitizer.sanitize(request.getRequestURI()), ex);
+        log.error("Unexpected error while handling request", ex);
         return respond(ErrorCode.INTERNAL_ERROR, List.of(), request);
     }
 
