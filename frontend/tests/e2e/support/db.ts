@@ -1,37 +1,33 @@
 import { execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
 
-const composeFile = fileURLToPath(new URL('../../../../docker-compose.dev.yml', import.meta.url));
+/** Trình khách mysql; trên Windows mặc định là bản đi kèm MySQL Server 8.0. Đặt MYSQL_CLI để dùng đường dẫn khác. */
+const mysqlCli =
+  process.env.MYSQL_CLI ??
+  (process.platform === 'win32'
+    ? 'C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql.exe'
+    : 'mysql');
 
-/** Chạy một câu SQL trên PostgreSQL của docker-compose.dev.yml; trả về các dòng, cột phân tách bằng "|". */
+/** Chạy một câu SQL trên database dev (MySQL); trả về các dòng, mỗi dòng là mảng giá trị cột. */
 export function sql(statement: string): string[][] {
   const output = execFileSync(
-    'docker',
+    mysqlCli,
     [
-      'compose',
-      '-f',
-      composeFile,
-      'exec',
-      '-T',
-      'postgres',
-      'psql',
-      '-U',
-      process.env.DB_USERNAME ?? 'fitness',
-      '-d',
-      process.env.DB_NAME ?? 'fitness_operations',
-      '-At',
-      '-F',
-      '|',
-      '-c',
-      statement,
+      `--host=${process.env.E2E_DB_HOST ?? '127.0.0.1'}`,
+      `--port=${process.env.E2E_DB_PORT ?? '3306'}`,
+      `--user=${process.env.E2E_DB_USERNAME ?? 'fitness'}`,
+      `--password=${process.env.E2E_DB_PASSWORD ?? 'fitness'}`,
+      '--default-character-set=utf8mb4',
+      '--batch',
+      '--skip-column-names',
+      `--database=${process.env.E2E_DB_NAME ?? 'fitness_operations'}`,
+      `--execute=${statement}`,
     ],
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   );
   return output
-    .split('\n')
-    .map((line) => line.trim())
+    .split(/\r?\n/)
     .filter((line) => line.length > 0)
-    .map((line) => line.split('|'));
+    .map((line) => line.split('\t'));
 }
 
 /** Gỡ tạm khóa của các tài khoản mẫu để có thể chạy lại kiểm thử ngay. */

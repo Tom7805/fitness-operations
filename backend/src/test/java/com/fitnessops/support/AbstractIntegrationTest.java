@@ -19,11 +19,11 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-/** Nền cho kiểm thử tích hợp: toàn bộ ứng dụng, PostgreSQL thật, migration Flyway thật. */
+/** Nền cho kiểm thử tích hợp: toàn bộ ứng dụng, MySQL thật, migration Flyway thật. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestContainersConfig.class)
+@Import(IntegrationTestConfig.class)
 public abstract class AbstractIntegrationTest {
 
     protected static final String LOGIN_URL = "/api/v1/auth/login";

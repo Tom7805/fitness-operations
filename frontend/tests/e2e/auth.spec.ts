@@ -157,15 +157,16 @@ test('TC-02: nhập sai mật khẩu năm lần liên tiếp, lần thứ sáu b
   expect((await response.json()).code).toBe('ACCOUNT_TEMPORARILY_LOCKED');
 
   const [state] = sql(
-    `SELECT failed_login_attempts, locked_until > now() FROM users WHERE username = '${username}'`,
+    `SELECT failed_login_attempts, locked_until > UTC_TIMESTAMP() FROM users WHERE username = '${username}'`,
   );
-  expect(state).toEqual(['5', 't']);
+  expect(state).toEqual(['5', '1']);
 });
 
 test('TC-04: mọi lần đăng nhập thành công hoặc thất bại đều có nhật ký người thực hiện, nội dung, thời điểm', async ({
   page,
 }, testInfo) => {
-  const marker = new Date(Date.now() - 2000).toISOString();
+  // Thời điểm trong cơ sở dữ liệu lưu theo UTC, dạng 'YYYY-MM-DD HH:MM:SS'.
+  const marker = new Date(Date.now() - 2000).toISOString().slice(0, 19).replace('T', ' ');
   await page.goto('/login');
   await login(page, 'tuvan.caugiay', 'sai-mat-khau');
   await expect(page.getByRole('alert')).toBeVisible();
@@ -186,7 +187,7 @@ test('TC-04: mọi lần đăng nhập thành công hoặc thất bại đều c
       'tuvan.caugiay',
       client,
       'Đăng nhập thất bại: sai mật khẩu (lần 1/5 liên tiếp)',
-      't',
+      '1',
     ],
     [
       'LOGIN_SUCCEEDED',
@@ -194,7 +195,7 @@ test('TC-04: mọi lần đăng nhập thành công hoặc thất bại đều c
       'tuvan.caugiay',
       client,
       `Đăng nhập thành công trên ${clientLabel}`,
-      't',
+      '1',
     ],
   ]);
 

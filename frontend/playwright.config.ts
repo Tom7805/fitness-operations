@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Kiểm thử đầu-cuối trên hệ thống thật: frontend (Vite) + backend (profile dev) + PostgreSQL (docker-compose.dev.yml)
+ * Kiểm thử đầu-cuối trên hệ thống thật: frontend (Vite) + backend (profile dev) + MySQL 8 trên máy
  * với dữ liệu mẫu R__seed_dev_sample_data.sql. Chạy ở hai kích thước bắt buộc của DoD: 1280px và 360px.
  */
 export default defineConfig({

@@ -1,12 +1,17 @@
 package com.fitnessops.support;
 
 import com.fitnessops.modules.auth.service.DeviceTokens;
-import java.sql.Timestamp;
-import java.time.Instant;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +41,7 @@ public class TestDataFactory {
     public long createBranch(String name) {
         String code = unique("CLB").toUpperCase(Locale.ROOT);
         String uniqueName = name + " " + code;
-        return jdbc.queryForObject("insert into branches (code, name, status) values (?, ?, 'ACTIVE') returning id",
-                Long.class, code, uniqueName);
+        return insertReturningId("insert into branches (code, name, status) values (?, ?, 'ACTIVE')", code, uniqueName);
     }
 
     public String branchName(long branchId) {
@@ -48,12 +52,24 @@ public class TestDataFactory {
         return new UserBuilder(unique(usernamePrefix));
     }
 
+    private long insertReturningId(String sql, Object... args) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbc.update(connection -> {
+            PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < args.length; i++) {
+                statement.setObject(i + 1, args[i]);
+            }
+            return statement;
+        }, keyHolder);
+        return Objects.requireNonNull(keyHolder.getKey()).longValue();
+    }
+
     /** Đăng ký sẵn một máy quầy, trả về mã máy quầy dạng rõ. */
     public String registerDevice(long branchId, String name, long registeredByUserId) {
         String token = DeviceTokens.generate();
         jdbc.update("insert into counter_devices (branch_id, name, token_hash, status, registered_by_user_id, "
                         + "registered_at) values (?, ?, ?, 'ACTIVE', ?, ?)",
-                branchId, name, DeviceTokens.hash(token), registeredByUserId, Timestamp.from(Instant.now()));
+                branchId, name, DeviceTokens.hash(token), registeredByUserId, LocalDateTime.now(ZoneOffset.UTC));
         return token;
     }
 
@@ -91,8 +107,8 @@ public class TestDataFactory {
         }
 
         public TestUser create() {
-            Long id = jdbc.queryForObject("insert into users (username, password_hash, full_name, job_title, status, "
-                            + "all_branches) values (?, ?, ?, ?, ?, ?) returning id", Long.class,
+            long id = insertReturningId("insert into users (username, password_hash, full_name, job_title, status, "
+                            + "all_branches) values (?, ?, ?, ?, ?, ?)",
                     username, FAST_ENCODER.encode(PASSWORD), "Người dùng " + username, "Nhân viên", status,
                     allBranches);
             for (String role : roles) {

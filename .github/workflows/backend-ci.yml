@@ -21,6 +21,20 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    # Kiểm thử tích hợp chạy trên MySQL thật (database bị xóa sạch và tạo lại bằng Flyway mỗi lần chạy).
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: fitness_operations_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,6 +68,10 @@ jobs:
 
       - name: Build, test and verify
         if: steps.changes.outputs.backend == 'true' && steps.project.outputs.ready == 'true'
+        env:
+          TEST_DB_URL: jdbc:mysql://127.0.0.1:3306/fitness_operations_test?characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+          TEST_DB_USERNAME: root
+          TEST_DB_PASSWORD: root
         run: |
           if [ -s mvnw ]; then
             chmod +x mvnw

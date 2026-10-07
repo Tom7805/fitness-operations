@@ -1,6 +1,7 @@
 spring:
   datasource:
-    password: ${DB_PASSWORD:fitness}
+    # Mật khẩu tài khoản dev tạo bởi scripts/mysql-dev-setup.sql; môi trường khác đặt SPRING_DATASOURCE_PASSWORD.
+    password: fitness
   flyway:
     # db/seed chứa dữ liệu mẫu chỉ dùng cho máy phát triển.
     locations: classpath:db/migration,classpath:db/seed

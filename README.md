@@ -55,13 +55,13 @@ Hệ thống quản lý vận hành phòng tập (gym/fitness center) gồm back
 | Ngôn ngữ | Java 17 |
 | Framework | Spring Boot 3.x (Web, Data JPA, Security, Validation, Mail, Actuator) |
 | Build | Maven (Maven Wrapper) |
-| Cơ sở dữ liệu | PostgreSQL |
+| Cơ sở dữ liệu | MySQL 8 ([ADR 0005](docs/architecture/adr/0005-use-mysql-instead-of-postgresql.md)) |
 | Migration | Flyway |
 | Cache | Redis |
 | Xác thực | JWT |
 | Mapping | MapStruct, Lombok |
 | Tài liệu API | SpringDoc OpenAPI (Swagger UI) |
-| Kiểm thử | JUnit 5, Mockito, Testcontainers, ArchUnit |
+| Kiểm thử | JUnit 5, Mockito, Spring MockMvc (tích hợp trên MySQL thật), ArchUnit |
 | Chất lượng mã | Checkstyle, SpotBugs, PMD, JaCoCo |
 
 ### Frontend
@@ -97,7 +97,7 @@ Dự án tổ chức theo dạng **monorepo**: backend và frontend nằm chung 
 
 ```
 Trình duyệt ──► Nginx ──┬──► frontend (React SPA)
-                        └──► /api ──► backend (Spring Boot) ──► PostgreSQL, Redis
+                        └──► /api ──► backend (Spring Boot) ──► MySQL, Redis
 ```
 
 ### Backend: Modular Monolith
@@ -194,7 +194,8 @@ fitness-operations/
 
 - JDK 17
 - Node.js 22 LTS trở lên
-- Docker và Docker Compose
+- MySQL Server 8 (xem MySQL Workbench để quản lý dữ liệu)
+- Docker và Docker Compose (chỉ cần khi chạy toàn bộ hệ thống bằng container)
 - Git
 
 ### Cài đặt và chạy
@@ -208,8 +209,8 @@ cd fitness-operations
 cp .env.example .env
 cp frontend/.env.example frontend/.env
 
-# 3. Khởi động hạ tầng (PostgreSQL, Redis...)
-docker compose -f docker-compose.dev.yml up -d
+# 3. Tạo database và tài khoản MySQL (chạy một lần bằng root, ví dụ trong MySQL Workbench)
+#    scripts/mysql-dev-setup.sql
 
 # 4. Chạy backend với profile dev
 cd backend

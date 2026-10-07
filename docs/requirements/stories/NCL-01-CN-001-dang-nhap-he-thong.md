@@ -120,7 +120,8 @@ sau mở rộng các bảng này bằng migration mới, không sửa migration 
 - Mỗi lần xử lý yêu cầu đăng nhập — thành công hay thất bại — ghi **một dòng nhật ký** gồm: người thực hiện (tài khoản
   nếu xác định được, và tên đăng nhập đã nhập), **nội dung** (loại sự kiện, mã lý do, mô tả tiếng Việt), **thời điểm**,
   loại thiết bị, máy quầy, câu lạc bộ, địa chỉ IP, trình duyệt.
-- Nhật ký **chỉ được thêm mới**: cơ sở dữ liệu chặn `UPDATE`, `DELETE`, `TRUNCATE` trên bảng nhật ký bằng trigger.
+- Nhật ký **chỉ được thêm mới**: cơ sở dữ liệu chặn `UPDATE`, `DELETE` trên bảng nhật ký bằng trigger; `TRUNCATE` được
+  chặn bằng quyền — tài khoản ứng dụng ở staging/prod không có quyền `DROP` (MySQL không có trigger cho `TRUNCATE`).
 - Ghi nhật ký nằm **trong cùng giao dịch** với thao tác: không ghi được nhật ký thì thao tác không hoàn tất.
 - Không ghi mật khẩu (kể cả mật khẩu sai) vào nhật ký hay log ứng dụng.
 

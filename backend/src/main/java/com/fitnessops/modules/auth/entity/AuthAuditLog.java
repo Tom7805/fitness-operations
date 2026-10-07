@@ -18,10 +18,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /**
- * Một dòng nhật ký đăng nhập. Chỉ thêm mới: thực thể bất biến ở tầng ứng dụng và cơ sở dữ liệu chặn
- * UPDATE, DELETE, TRUNCATE bằng trigger (QTN-02).
+ * Một dòng nhật ký đăng nhập. Chỉ thêm mới: thực thể bất biến ở tầng ứng dụng và cơ sở dữ liệu chặn UPDATE, DELETE
+ * bằng trigger (QTN-02). Tài khoản cơ sở dữ liệu ở môi trường thật không được có quyền DROP để chặn TRUNCATE.
  */
 @Entity
 @Immutable
@@ -50,7 +52,8 @@ public class AuthAuditLog {
     @Column(updatable = false, length = 100)
     private String username;
 
-    @Column(name = "session_id", updatable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "session_id", updatable = false, length = 36)
     private UUID sessionId;
 
     @Enumerated(EnumType.STRING)

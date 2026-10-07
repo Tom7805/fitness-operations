@@ -14,6 +14,8 @@ import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 /** Phiên làm việc lưu ở máy chủ. Mã truy cập chỉ mang mã phiên; máy chủ quyết định phiên còn hiệu lực hay không. */
 @Entity
@@ -22,7 +24,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSession {
 
+    /** Lưu dạng chuỗi CHAR(36) để đọc được trực tiếp trong MySQL Workbench. */
     @Id
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(length = 36)
     private UUID id;
 
     @Column(name = "user_id", nullable = false, updatable = false)

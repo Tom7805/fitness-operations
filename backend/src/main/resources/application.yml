@@ -4,9 +4,11 @@ spring:
   profiles:
     default: dev
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/fitness_operations}
-    username: ${DB_USERNAME:fitness}
-    password: ${DB_PASSWORD:}
+    # Ghi đè bằng biến môi trường chuẩn của Spring Boot: SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME,
+    # SPRING_DATASOURCE_PASSWORD (không dùng DB_PASSWORD chung chung để khỏi trùng với dự án khác trên cùng máy).
+    # Thời điểm lưu theo UTC (hibernate.jdbc.time_zone); dữ liệu tiếng Việt dùng utf8mb4.
+    url: jdbc:mysql://localhost:3306/fitness_operations?characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: fitness
     hikari:
       maximum-pool-size: ${DB_POOL_SIZE:10}
   jpa:
